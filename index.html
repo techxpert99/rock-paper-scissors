@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rock, Paper & Scissors</title>
+    <script>
+        function update_game_stats() {
+            document.getElementById('cur-round').textContent = window._rpc.rounds+1;
+            document.getElementById('max-round').textContent = window._rpc.max;
+            document.getElementById('wins').textContent = window._rpc.wins;
+            document.getElementById('draws').textContent = window._rpc.draws;
+            document.getElementById('losses').textContent = window._rpc.rounds - window._rpc.draws - window._rpc.wins;
+        }
+        function play(x) {
+            if(window._rpc.state != 'active') return;
+            window._rpc.state = 'inactive';
+            window._rpc.rounds++;
+            y = ['Rock','Paper','Scissors'][Math.floor(Math.random()*3)];
+            document.getElementById('message-you').textContent = 'You: ' + x;
+            document.getElementById('message-computer').textContent = 'Computer: ' + y;
+            document.getElementById('message-outcome').textContent = 'Outcome: ' + (() => {
+                if(x == y) {
+                    window._rpc.draws++;
+                    return 'The round was a draw !';
+                }
+                if(x == 'Rock') {
+                    if(y == 'Paper') return 'You lost the round !';
+                    window._rpc.wins++;
+                    return 'You win !';
+                }
+                if(x == 'Paper') {
+                    if(y == 'Rock') {
+                        window._rpc.wins++;
+                        return 'You won the round !';
+                    }
+                    return 'You lost the round!';
+                }
+                if(y == 'Rock') return 'You lost the round !';
+                window._rpc.wins++;
+                return 'You won the round !';
+            })();
+            document.getElementById('message-score').textContent = 'Your score: ' + window._rpc.wins + ' wins, ' +  window._rpc.draws + ' draws, ' + (window._rpc.rounds - window._rpc.wins - window._rpc.draws) + ' losses';
+            document.getElementById('game').style.display = 'none';
+            document.getElementById('messages').style.display = 'block';
+            if(window._rpc.rounds == window._rpc.max)
+                document.getElementById('end').style.display = 'block';
+            else
+                document.getElementById('next').style.display = 'block';
+        }
+        function next() {
+            document.getElementById('next').style.display = 'none';
+            document.getElementById('messages').style.display = 'none';
+            document.getElementById('game').style.display = 'block';
+            update_game_stats();
+            window._rpc.state = 'active';
+        }
+        function end() {
+            document.getElementById('end').style.display = 'none';
+            document.getElementById('messages').style.display = 'none';
+            let wins = window._rpc.wins, draws = window._rpc.draws, losses = window._rpc.rounds - window._rpc.draws - window._rpc.wins;
+            document.getElementById('final-score').textContent = `${wins} win/s, ${draws} draw/s, ${losses} loss/es`;
+            document.getElementById('final-outcome').textContent = (() => {
+                if(wins > losses)
+                    return 'You won !';
+                if(losses > wins)
+                    return 'You lost !';
+                return 'The game ended in a draw !';
+            })();
+            document.getElementById('end-message').style.display = 'block';
+        }
+        window.onload = () => {
+            window._rpc = {state:'active',rounds:0,wins:0,max:5,draws:0};
+            update_game_stats();
+            document.getElementById('rock').onclick = () => {
+                play('Rock');
+            };
+            document.getElementById('paper').onclick = () => {
+                play('Paper');
+            };
+            document.getElementById('scissors').onclick = () => {
+                play('Scissors');
+            };
+            document.getElementById('next').onclick = () => {
+                next();
+            }
+            document.getElementById('end').onclick = () => {
+                end();
+            }
+        }
+    </script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #253737;
+        }
+        p {
+            font-family: monospace;
+            color: white;
+            font-weight: bold;
+            padding-bottom: 32px;
+            font-size: 16px;
+        }
+        .input {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 32px;
+        }
+        button {
+            border: 2px solid #00ffbb;
+            border-radius: 8px;
+            background: hsla(162, 100%, 50%, 0.305);
+            padding: 8px;
+            color: white;
+            font-family: monospace;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100px;
+        }
+        button:hover {
+            background: hsla(137, 100%, 50%, 0.5);;
+        }
+        button:active {
+            background: hsla(137, 100%, 50%, 0.8);;
+        }
+        @keyframes next-animation {
+            16% {background: hsla(162, 100%, 50%, 0.305);}
+            33% {background: hsla(137, 100%, 50%, 0.5);}
+            50% {background: hsla(137, 100%, 50%, 0.8);}
+            83% {background: hsla(137, 100%, 50%, 0.5);}
+            100% {background: hsla(162, 100%, 50%, 0.305);}
+        }
+        #next,#end {
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation-name: next-animation;
+            animation-duration: 4s;
+            animation-iteration-count: infinite;
+            display: none;
+        }
+        #messages {
+            display: none;
+        }
+        #header {
+            display: flex;
+            justify-content: space-between;
+        }
+        #special {
+            min-width: 400px;
+        }
+        #end-message {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="game">
+        <div id="header">
+            <p id="rounds">Round <span id="cur-round"></span>/<span id="max-round"></span></p>
+            <p><span id="wins"></span> win/s, <span id="draws"></span> draw/s, <span id="losses"></span> loss/es </p>
+        </div>
+        <p id="special">
+            Choose your move (Rock, Paper, or Scissors) !
+        </p>
+        <div class="input">
+            <button id="rock">Rock</button>
+            <button id="paper">Paper</button>
+            <button id="scissors">Scissors</button>
+        </div>
+    </div>
+    <div id="messages">
+        <p id="message-you"></p>
+        <p id="message-computer"></p>
+        <p id="message-outcome"></p>
+        <p id="message-score"></p>
+    </div>
+    <button id="next">&gt;</button>
+    <button id="end">&gt;&gt;</button>
+    <div id="end-message">
+        <p> Your score: <span id="final-score"></span></p>
+        <p> Outcome: <span id="final-outcome"></span></p>
+    </div>
+</body>
+</html>
